@@ -1,0 +1,16 @@
+# Сборка приложения
+ARG DOCKER_GO_VERSION
+FROM golang:$DOCKER_GO_VERSION AS builder
+ARG NGINX_ROOT_DIR
+WORKDIR $NGINX_ROOT_DIR/app
+COPY app .
+RUN go build -o server cmd/api/main.go
+
+# Финальный образ
+FROM debian:trixie
+WORKDIR $NGINX_ROOT_DIR/app/
+ARG NGINX_ROOT_DIR
+COPY --from=builder $NGINX_ROOT_DIR/app/server .
+ARG GO_PORT
+EXPOSE $GO_PORT
+CMD $NGINX_ROOT_DIR/app/server
